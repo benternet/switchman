@@ -12,7 +12,11 @@ module Switchman
           reflection = reflection_for_integer_attribute(column_name.to_s)
           return false unless reflection
 
-          reflection.options[:polymorphic] || reflection.klass.sharded_primary_key?
+          return true if reflection.options[:polymorphic]
+
+          raise "#{reflection.klass.name} is not an ActiveRecord::Base when reflecting #{name}##{column_name}" unless reflection.klass.ancestors.include?(ActiveRecord::Base)
+
+          reflection.klass.sharded_primary_key?
         end
 
         def sharded_column?(column_name)
